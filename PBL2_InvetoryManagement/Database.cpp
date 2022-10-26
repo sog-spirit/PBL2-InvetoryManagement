@@ -86,5 +86,30 @@ void Database::DestroyDatabaseInstance() {
     SQLDisconnect(sqlConnectionHandle);
     SQLFreeHandle(SQL_HANDLE_DBC, sqlConnectionHandle);
     SQLFreeHandle(SQL_HANDLE_ENV, sqlEnvironmentHandle);
+    std::cout << "Database instance destroyed successfully.\n";
     exit(0);
+}
+
+void Database::GetCategories() {
+    SQLWCHAR* query = (SQLWCHAR*)L"SELECT * FROM CATEGORY";
+
+    std::cout << "Getting all categories...\n";
+    if (SQL_SUCCESS != SQLExecDirect(
+        sqlStatementHandle,
+        query,
+        SQL_NTS
+    )) {
+        std::cout << "An error has occurred while getting all categories...\n";
+    }
+    else {
+        SQLINTEGER ptrSqlVersion;
+        int categoryId;
+        char categoryName[50];
+        while (SQLFetch(sqlStatementHandle) == SQL_SUCCESS) {
+            SQLGetData(sqlStatementHandle, 1, SQL_C_DEFAULT, &categoryId, 1, &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 2, SQL_C_CHAR, categoryName, sizeof(categoryName), &ptrSqlVersion);
+            std::cout << "\nProduct id: " << categoryId << "\nProduct name: " << categoryName << "\n";
+        }
+    }
+    SQLCancel(sqlStatementHandle);
 }

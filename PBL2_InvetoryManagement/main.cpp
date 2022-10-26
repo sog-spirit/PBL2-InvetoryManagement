@@ -1,8 +1,8 @@
-#include "Database.h"
+#include <iostream>
+#include "Program.h"
 
 int main() {
-	Database databaseInstance;
-	databaseInstance.InitializeDatabaseInstance();
-	databaseInstance.DestroyDatabaseInstance();
+	Program program;
+	program.MainProgram();
 	return 0;
 }

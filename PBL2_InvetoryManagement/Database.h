@@ -20,4 +20,5 @@ private:
 public:
 	void InitializeDatabaseInstance();
 	void DestroyDatabaseInstance();
+	void GetCategories();
 };
