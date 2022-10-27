@@ -91,10 +91,39 @@ void Database::DestroyDatabaseInstance() {
     exit(0);
 }
 
+int Database::CreateInvoice() {
+    SQLCHAR* query = (SQLCHAR*)"INSERT INTO INVOICE DEFAULT VALUES";
+
+    return SQLExecDirectA(sqlStatementHandle, query, SQL_NTS);
+}
+
+void Database::GetInvoices() {
+    SQLCHAR* query = (SQLCHAR*)"SELECT InvoiceID, INVOICE_DETAIL.ProductID, ProductName, Quantity, Price FROM INVOICE_DETAIL INNER JOIN PRODUCT ON INVOICE_DETAIL.ProductID = PRODUCT.ProductID";
+    std::cout << "\nGetting all invoice informations.\n";
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, query, SQL_NTS)) {
+        std::cout << "An error has occurred while getting all invoice informations.\n";
+    }
+    else {
+        SQLINTEGER ptrSqlVersion;
+        int invoiceId, productId, quantity, price;
+        char productName[50];
+        while (SQLFetch(sqlStatementHandle) == SQL_SUCCESS) {
+            SQLGetData(sqlStatementHandle, 1, SQL_C_DEFAULT, &invoiceId, 1, &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 2, SQL_C_DEFAULT, &productId, 1, &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 3, SQL_C_CHAR, productName, sizeof(productName), &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 4, SQL_C_DEFAULT, &quantity, 1, &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 5, SQL_C_DEFAULT, &price, 1, &ptrSqlVersion);
+            std::cout << "\nInvoice ID: " << invoiceId << "\nProduct ID: " << productId << "\nProduct name: " << productName << "\nQuantity: " << quantity << "\nPrice: " << price << "\n";
+        }
+    }
+    SQLCancel(sqlStatementHandle);
+}
+
 void Database::GetCategories() {
     SQLWCHAR* query = (SQLWCHAR*)L"SELECT * FROM CATEGORY";
 
-    std::cout << "Getting all categories...\n";
+    std::cout << "\nGetting all categories...\n";
     if (SQL_SUCCESS != SQLExecDirect(
         sqlStatementHandle,
         query,
@@ -175,6 +204,52 @@ void Database::RemoveProduct(int productId) {
     }
     else {
         std::cout << "\nProduct deleted successfully.\n";
+    }
+    SQLCancel(sqlStatementHandle);
+}
+
+void Database::AddProductToInvoice(std::string productId, std::string quantity) {
+    int productPrice, price, invoiceId;
+    std::string getProductQuery = "SELECT ProductPrice FROM PRODUCT WHERE ProductID = " + productId;
+    SQLCHAR* queryChar = (SQLCHAR*)getProductQuery.c_str();
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, queryChar, SQL_NTS)) {
+        std::cout << "\nAn error has occurred while adding product to invoice.\n";
+        return;
+    }
+    else {
+        while (SQLFetch(sqlStatementHandle) == SQL_SUCCESS) {
+            SQLINTEGER ptrSqlVersion;
+            SQLGetData(sqlStatementHandle, 1, SQL_C_DEFAULT, &productPrice, 1, &ptrSqlVersion);
+        }
+    }
+    SQLCancel(sqlStatementHandle);
+
+    std::string getInvoiceIdQuery = "SELECT MAX(InvoiceID) as InvoiceID FROM INVOICE";
+    queryChar = (SQLCHAR*)getInvoiceIdQuery.c_str();
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, queryChar, SQL_NTS)) {
+        std::cout << "\nAn error has occurred while adding product to invoice.\n";
+        return;
+    }
+    else {
+        while (SQLFetch(sqlStatementHandle) == SQL_SUCCESS) {
+            SQLINTEGER ptrSqlVersion;
+            SQLGetData(sqlStatementHandle, 1, SQL_C_DEFAULT, &invoiceId, 1, &ptrSqlVersion);
+        }
+    }
+    SQLCancel(sqlStatementHandle);
+
+    price = productPrice * std::stoi(quantity);    
+    std::string addToInvoiceQuery = "INSERT INTO INVOICE_DETAIL (InvoiceID, ProductID, Quantity, Price) VALUES (" + std::to_string(invoiceId) + "," + productId + "," + quantity + "," + std::to_string(price) + ")";
+    queryChar = (SQLCHAR*)addToInvoiceQuery.c_str();
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, queryChar, SQL_NTS)) {
+        std::cout << "\nAn error has occurred while adding product to invoice.\n";
+        return;
+    }
+    else {
+        std::cout << "\nProduct added to invoice successfully.\n";
     }
     SQLCancel(sqlStatementHandle);
 }

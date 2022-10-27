@@ -11,6 +11,7 @@ void Program::MainProgram() {
 
 		switch (userChoice) {
 		case CREATE_INVOICE:
+			CreateInvoice(databaseInstance);
 			break;
 
 		case GET_PRODUCT_LIST:
@@ -18,6 +19,7 @@ void Program::MainProgram() {
 			break;
 
 		case GET_INVOICE_LIST:
+			GetInvoices(databaseInstance);
 			break;
 
 		case ADD_PRODUCT:
@@ -32,6 +34,7 @@ void Program::MainProgram() {
 			break;
 
 		case SORT_PRODUCT:
+
 			break;
 
 		case EXIT_PROGRAM:
@@ -62,16 +65,40 @@ int Program::Menu() {
 	return intUserChoice;
 }
 
+void Program::CreateInvoice(Database &databaseInstance) {
+	std::string continueCreate, productId, quantity;
+	
+	if (databaseInstance.CreateInvoice() != SQL_SUCCESS) {
+		std::cout << "\nAn error has occurred while creating invoice.\n";
+		return;
+	}
+
+	do {
+		std::cout << "\nNhap ID san pham can tao hoa don: ";
+		std::getline(std::cin >> std::ws, productId);
+		std::cout << "Nhap so luong: ";
+		std::getline(std::cin >> std::ws, quantity);
+		databaseInstance.AddProductToInvoice(productId, quantity);
+		std::cout << "Tiep tuc them? [y/n]: ";
+		std::getline(std::cin >> std::ws, continueCreate);
+	} while (continueCreate.compare("y") == 0 ||
+		continueCreate.compare("Y") == 0);
+}
+
+void Program::GetInvoices(Database &databaseInstance) {
+	databaseInstance.GetInvoices();
+}
+
 void Program::AddProduct(Database &databaseInstance) {
 	databaseInstance.GetCategories();
 	databaseInstance.AddProduct();
 }
 
-void Program::GetProducts(Database& databaseInstance) {
+void Program::GetProducts(Database &databaseInstance) {
 	databaseInstance.GetProducts();
 }
 
-void Program::RemoveProduct(Database& databaseInstance) {
+void Program::RemoveProduct(Database &databaseInstance) {
 	int productId;
 	std::string userChoice;
 
@@ -79,4 +106,8 @@ void Program::RemoveProduct(Database& databaseInstance) {
 	std::getline(std::cin >> std::ws, userChoice);
 	productId = std::stoi(userChoice);
 	databaseInstance.RemoveProduct(productId);
+}
+
+void Program::SortProduct(Database &databaseInstance) {
+
 }

@@ -21,8 +21,11 @@ private:
 public:
 	void InitializeDatabaseInstance();
 	void DestroyDatabaseInstance();
+	int CreateInvoice();
+	void GetInvoices();
 	void GetCategories();
 	void AddProduct();
 	void GetProducts();
 	void RemoveProduct(int productId);
+	void AddProductToInvoice(std::string productId, std::string quantity);
 };

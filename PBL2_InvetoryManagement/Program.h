@@ -17,7 +17,10 @@ public:
 
 	void static MainProgram();
 	int static Menu();
+	void static CreateInvoice(Database &instance);
+	void static GetInvoices(Database& instance);
 	void static AddProduct(Database &instance);
 	void static GetProducts(Database &instance);
-	void static RemoveProduct(Database& instance);
+	void static RemoveProduct(Database &instance);
+	void static SortProduct(Database &instance);
 };
