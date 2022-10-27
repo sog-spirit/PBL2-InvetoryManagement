@@ -43,7 +43,7 @@ void Database::InitializeDatabaseInstance() {
         inConnectionString,
         SQL_NTS,
         outConnectionString,
-        1024,
+        2048,
         NULL,
         SQL_DRIVER_NOPROMPT
     )) {
@@ -86,7 +86,8 @@ void Database::DestroyDatabaseInstance() {
     SQLDisconnect(sqlConnectionHandle);
     SQLFreeHandle(SQL_HANDLE_DBC, sqlConnectionHandle);
     SQLFreeHandle(SQL_HANDLE_ENV, sqlEnvironmentHandle);
-    std::cout << "Database instance destroyed successfully.\n";
+    std::cout << "\nDatabase instance destroyed successfully.\n";
+    std::cout << "Closing program.\n";
     exit(0);
 }
 
@@ -108,7 +109,57 @@ void Database::GetCategories() {
         while (SQLFetch(sqlStatementHandle) == SQL_SUCCESS) {
             SQLGetData(sqlStatementHandle, 1, SQL_C_DEFAULT, &categoryId, 1, &ptrSqlVersion);
             SQLGetData(sqlStatementHandle, 2, SQL_C_CHAR, categoryName, sizeof(categoryName), &ptrSqlVersion);
-            std::cout << "\nProduct id: " << categoryId << "\nProduct name: " << categoryName << "\n";
+            std::cout << "\nCategory ID: " << categoryId << "\nCategory name: " << categoryName << "\n";
+        }
+    }
+    SQLCancel(sqlStatementHandle);
+}
+
+void Database::AddProduct() {
+    std::string categoryId, productName, productPrice;
+
+    std::cout << "\nNhap ma loai: "; std::getline(std::cin >> std::ws, categoryId);
+    std::cout << "Nhap ten san pham: "; std::getline(std::cin >> std::ws, productName);
+    std::cout << "Nhap gia san pham: "; std::getline(std::cin >> std::ws, productPrice);
+
+    std::string query = "INSERT INTO PRODUCT VALUES('"
+        + categoryId + "','"
+        + productName + "','"
+        + productPrice + "',"
+        + std::to_string(0) + ")";
+
+    SQLCHAR* queryChar = (SQLCHAR*)query.c_str();
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, queryChar, SQL_NTS)) {
+        std::cout << "\nAn error has ocurred while adding new product.\n";
+    }
+    else {
+        std::cout << "\nProduct " << productName << " added successfully.\n";
+    }
+    SQLCancel(sqlStatementHandle);
+}
+
+void Database::GetProducts() {
+    std::string query = "SELECT ProductID, ProductName, CategoryName, ProductPrice "
+        "FROM PRODUCT INNER JOIN CATEGORY ON PRODUCT.CategoryID = CATEGORY.CategoryID "
+        "WHERE IsDeleted = 0";
+
+    SQLCHAR* queryChar = (SQLCHAR*)query.c_str();
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, queryChar, SQL_NTS)) {
+        std::cout << "\nAn error has occured while getting products.\n";
+    }
+    else {
+        SQLINTEGER ptrSqlVersion;
+        int productId, productPrice;
+        char productName[50], categoryName[50];
+
+        while (SQLFetch(sqlStatementHandle) == SQL_SUCCESS) {
+            SQLGetData(sqlStatementHandle, 1, SQL_C_DEFAULT, &productId, 1, &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 2, SQL_C_CHAR, productName, sizeof(productName), &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 3, SQL_C_CHAR, categoryName, sizeof(categoryName), &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 4, SQL_C_DEFAULT, &productPrice, 1, &ptrSqlVersion);
+            std::cout << "\nProduct ID: " << productId << "\nProduct name: " << productName << "\nCategory name: " << categoryName << "\nProduct price: " << productPrice << "\n";
         }
     }
     SQLCancel(sqlStatementHandle);

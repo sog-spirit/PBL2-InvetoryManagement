@@ -10,6 +10,10 @@ void Program::MainProgram() {
 		userChoice = Menu();
 
 		switch (userChoice) {
+		case GET_PRODUCT_LIST:
+			GetProducts(databaseInstance);
+			break;
+
 		case ADD_PRODUCT:
 			AddProduct(databaseInstance);
 			break;
@@ -24,7 +28,9 @@ void Program::MainProgram() {
 }
 
 int Program::Menu() {
-	int userChoice;
+	int intUserChoice;
+	std::string userChoice;
+
 	std::cout << "\nQUAN LY KHO HANG\n\n";
 	std::cout << "1. Lap hoa don.\n";
 	std::cout << "2. Xem tat ca san pham.\n";
@@ -35,10 +41,16 @@ int Program::Menu() {
 	std::cout << "7. Sap xep san pham theo gia.\n";
 	std::cout << "8. Thoat.\n";
 	std::cout << "\nLua chon: ";
-	std::cin >> userChoice;
-	return userChoice;
+	std::getline(std::cin >> std::ws, userChoice);
+	intUserChoice = std::stoi(userChoice);
+	return intUserChoice;
 }
 
 void Program::AddProduct(Database &databaseInstance) {
 	databaseInstance.GetCategories();
+	databaseInstance.AddProduct();
+}
+
+void Program::GetProducts(Database& databaseInstance) {
+	databaseInstance.GetProducts();
 }

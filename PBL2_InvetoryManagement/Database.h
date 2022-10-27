@@ -5,10 +5,11 @@
 #include <sqltypes.h>
 #include <sql.h>
 #include <stdlib.h>
+#include <string>
 
 class Database {
-#define SQL_RESULT_LEN 256
-#define SQL_RETURN_CODE_LEN 1024
+#define SQL_RESULT_LEN 2048
+#define SQL_RETURN_CODE_LEN 2048
 
 private:
 	SQLHANDLE sqlConnectionHandle;
@@ -21,4 +22,6 @@ public:
 	void InitializeDatabaseInstance();
 	void DestroyDatabaseInstance();
 	void GetCategories();
+	void AddProduct();
+	void GetProducts();
 };

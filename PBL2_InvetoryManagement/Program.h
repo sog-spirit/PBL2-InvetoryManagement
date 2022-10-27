@@ -18,4 +18,5 @@ public:
 	void static MainProgram();
 	int static Menu();
 	void static AddProduct(Database &instance);
+	void static GetProducts(Database &instance);
 };
