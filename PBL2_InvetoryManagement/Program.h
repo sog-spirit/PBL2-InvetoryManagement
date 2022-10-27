@@ -19,4 +19,5 @@ public:
 	int static Menu();
 	void static AddProduct(Database &instance);
 	void static GetProducts(Database &instance);
+	void static RemoveProduct(Database& instance);
 };

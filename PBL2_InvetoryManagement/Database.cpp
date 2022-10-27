@@ -164,3 +164,17 @@ void Database::GetProducts() {
     }
     SQLCancel(sqlStatementHandle);
 }
+
+void Database::RemoveProduct(int productId) {
+    std::string query = "UPDATE PRODUCT SET IsDeleted = 1 WHERE ProductID = " + std::to_string(productId);
+
+    SQLCHAR* queryChar = (SQLCHAR*)query.c_str();
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, queryChar, SQL_NTS)) {
+        std::cout << "\nAn error has occurred while deleting product.\n";
+    }
+    else {
+        std::cout << "\nProduct deleted successfully.\n";
+    }
+    SQLCancel(sqlStatementHandle);
+}

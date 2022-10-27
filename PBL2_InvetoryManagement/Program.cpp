@@ -10,12 +10,28 @@ void Program::MainProgram() {
 		userChoice = Menu();
 
 		switch (userChoice) {
+		case CREATE_INVOICE:
+			break;
+
 		case GET_PRODUCT_LIST:
 			GetProducts(databaseInstance);
 			break;
 
+		case GET_INVOICE_LIST:
+			break;
+
 		case ADD_PRODUCT:
 			AddProduct(databaseInstance);
+			break;
+
+		case REMOVE_PRODUCT:
+			RemoveProduct(databaseInstance);
+			break;
+
+		case TOTAL_SALES:
+			break;
+
+		case SORT_PRODUCT:
 			break;
 
 		case EXIT_PROGRAM:
@@ -53,4 +69,14 @@ void Program::AddProduct(Database &databaseInstance) {
 
 void Program::GetProducts(Database& databaseInstance) {
 	databaseInstance.GetProducts();
+}
+
+void Program::RemoveProduct(Database& databaseInstance) {
+	int productId;
+	std::string userChoice;
+
+	std::cout << "\nNhap ID san pham can xoa: ";
+	std::getline(std::cin >> std::ws, userChoice);
+	productId = std::stoi(userChoice);
+	databaseInstance.RemoveProduct(productId);
 }

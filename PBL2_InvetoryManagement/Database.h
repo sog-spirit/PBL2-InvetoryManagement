@@ -24,4 +24,5 @@ public:
 	void GetCategories();
 	void AddProduct();
 	void GetProducts();
+	void RemoveProduct(int productId);
 };
