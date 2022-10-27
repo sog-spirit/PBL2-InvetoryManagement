@@ -1,5 +1,7 @@
 #include "Database.h"
+#include "Product.h"
 #include <iostream>
+#include <vector>
 #include <conio.h>
 #include <string.h>
 
@@ -250,6 +252,129 @@ void Database::AddProductToInvoice(std::string productId, std::string quantity) 
     }
     else {
         std::cout << "\nProduct added to invoice successfully.\n";
+    }
+    SQLCancel(sqlStatementHandle);
+}
+
+void Database::GetTotalSalesByYear(std::string year) {
+    int productCount = 0, totalRevenue = 0, quantity, price;
+    std::string query = "SELECT Quantity, Price, CreationDate FROM INVOICE_DETAIL INNER JOIN INVOICE ON INVOICE_DETAIL.InvoiceID = INVOICE.InvoiceID  WHERE YEAR(CreationDate) = " + year;
+    SQLCHAR* queryChar = (SQLCHAR*) query.c_str();
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, queryChar, SQL_NTS)) {
+        std::cout << "\nAn error has occurred while getting total sales in year " << year << ".\n";
+        return;
+    }
+    else {
+        while (SQLFetch(sqlStatementHandle) == SQL_SUCCESS)
+        {
+            SQLINTEGER ptrSqlVersion;
+            SQLGetData(sqlStatementHandle, 1, SQL_C_DEFAULT, &quantity, 1, &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 2, SQL_C_DEFAULT, &price, 1, &ptrSqlVersion);
+            productCount += quantity;
+            totalRevenue += price;
+        }
+    }
+    std::cout << "So luong san pham da ban: " << productCount << "\n";
+    std::cout << "Tong doanh thu: " << totalRevenue << "\n";
+}
+
+bool Database::SortDescending(Product& product_a, Product& product_b) {
+    return product_a.GetProductPrice() >= product_b.GetProductPrice();
+}
+
+bool Database::SortAscending(Product& product_a, Product& product_b) {
+    return product_a.GetProductPrice() <= product_b.GetProductPrice();
+}
+
+void Database::ProductMergeSortIntervals(std::vector<Product>& productList, int start, int middle, int end, bool (*compareFunction)(Product &, Product &)) {
+    std::vector<Product> temp;
+
+    int i, j;
+    i = start;
+    j = middle + 1;
+
+    while (i <= middle && j <= end) {
+        if (compareFunction(productList[i], productList[j])) {
+            temp.push_back(productList[i]);
+            i++;
+        }
+        else {
+            temp.push_back(productList[j]);
+            j++;
+        }
+    }
+
+    while (i <= middle) {
+        temp.push_back(productList[i]);
+        i++;
+    }
+
+    while (j <= end) {
+        temp.push_back(productList[j]);
+        j++;
+    }
+
+    for (int i = start; i <= end; ++i) {
+        productList[i] = temp[i - start];
+    }
+}
+
+void Database::ProductMergeSort(std::vector<Product>& productList, int start, int end, bool (*compareFunction)(Product &, Product &)) {
+    if (start < end) {
+        int middle = (start + end) / 2;
+        ProductMergeSort(productList, start, middle, compareFunction);
+        ProductMergeSort(productList, middle + 1, end, compareFunction);
+        ProductMergeSortIntervals(productList, start, middle, end, compareFunction);
+    }
+}
+
+void Database::SortProductByPrice() {
+    std::string query = "SELECT ProductID, ProductName, CategoryName, ProductPrice "
+        "FROM PRODUCT INNER JOIN CATEGORY ON PRODUCT.CategoryID = CATEGORY.CategoryID "
+        "WHERE IsDeleted = 0";
+    SQLCHAR* queryChar = (SQLCHAR*)query.c_str();
+    
+    std::vector<Product> productArray;
+
+    if (SQL_SUCCESS != SQLExecDirectA(sqlStatementHandle, queryChar, SQL_NTS)) {
+        std::cout << "\nAn error has occurred while sorting products.\n";
+        return;
+    }
+    else {
+        while (SQLFetch(sqlStatementHandle) == SQL_SUCCESS) {
+            SQLINTEGER ptrSqlVersion;
+            int productId, productPrice;
+            char productName[50], categoryName[50];
+            
+            SQLGetData(sqlStatementHandle, 1, SQL_C_DEFAULT, &productId, 1, &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 2, SQL_C_CHAR, productName, sizeof(productName), &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 3, SQL_C_CHAR, categoryName, sizeof(categoryName), &ptrSqlVersion);
+            SQLGetData(sqlStatementHandle, 4, SQL_C_DEFAULT, &productPrice, 1, &ptrSqlVersion);
+
+            productArray.push_back(Product(
+                productId,
+                productPrice,
+                productName,
+                categoryName
+            ));
+        }
+    }
+    std::string userChoice;
+    std::cout << "\nThu tu sap xep (1: tang dan, 2: giam dan): ";
+    std::getline(std::cin >> std::ws, userChoice);
+
+    switch (std::stoi(userChoice)) {
+    case 1:
+        ProductMergeSort(productArray, 0, productArray.size() - 1, SortAscending);
+        break;
+    case 2:
+        ProductMergeSort(productArray, 0, productArray.size() - 1, SortDescending);
+        break;
+    }
+    
+    for (int i = 0; i < productArray.size(); ++i) {
+        std::cout << "\nProduct ID: " << productArray[i].GetProductId() << "\nProduct name: " << productArray[i].GetProductName() << "\nCategory name: " << productArray[i].GetCategoryName() << "\nProduct price: " << productArray[i].GetProductPrice() << "\n";
     }
     SQLCancel(sqlStatementHandle);
 }

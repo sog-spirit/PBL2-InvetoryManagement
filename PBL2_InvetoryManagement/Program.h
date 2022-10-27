@@ -22,5 +22,6 @@ public:
 	void static AddProduct(Database &instance);
 	void static GetProducts(Database &instance);
 	void static RemoveProduct(Database &instance);
-	void static SortProduct(Database &instance);
+	void static TotalSales(Database& instance);
+	void static SortProductByPrice(Database &instance);
 };

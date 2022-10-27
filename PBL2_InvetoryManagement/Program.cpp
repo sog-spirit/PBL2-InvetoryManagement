@@ -31,10 +31,11 @@ void Program::MainProgram() {
 			break;
 
 		case TOTAL_SALES:
+			TotalSales(databaseInstance);
 			break;
 
 		case SORT_PRODUCT:
-
+			SortProductByPrice(databaseInstance);
 			break;
 
 		case EXIT_PROGRAM:
@@ -108,6 +109,13 @@ void Program::RemoveProduct(Database &databaseInstance) {
 	databaseInstance.RemoveProduct(productId);
 }
 
-void Program::SortProduct(Database &databaseInstance) {
+void Program::TotalSales(Database& databaseInstance) {
+	std::string yearInput;
+	std::cout << "\nDoanh thu theo nam: ";
+	std::getline(std::cin >> std::ws, yearInput);
+	databaseInstance.GetTotalSalesByYear(yearInput);
+}
 
+void Program::SortProductByPrice(Database &databaseInstance) {
+	databaseInstance.SortProductByPrice();
 }

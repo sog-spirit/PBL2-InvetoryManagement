@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Product.h"
+#include <vector>
 #include <windows.h>
 #include <sqlext.h>
 #include <sqltypes.h>
@@ -28,4 +30,10 @@ public:
 	void GetProducts();
 	void RemoveProduct(int productId);
 	void AddProductToInvoice(std::string productId, std::string quantity);
+	void GetTotalSalesByYear(std::string year);
+	void ProductMergeSortIntervals(std::vector<Product> &productList, int start, int middle, int end, bool (*compareFunction)(Product &, Product &));
+	void ProductMergeSort(std::vector<Product>& productList, int start, int end, bool (*compareFunction)(Product &, Product &));
+	void SortProductByPrice();
+	static bool SortDescending(Product &product_a, Product &product_b);
+	static bool SortAscending(Product& product_a, Product& product_b);
 };
